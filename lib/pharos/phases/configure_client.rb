@@ -23,11 +23,11 @@ module Pharos
       def install_local_kubeconfig(config_data)
         Dir.mkdir(config_dir, 0o700) unless Dir.exist?(config_dir)
 
+        logger.info { "Saving kubeconfig to #{config_file} ..." }
+
         config_file = File.join(config_dir, @host.api_address)
         File.chmod(0o600, config_file) if File.exist?(config_file)
         File.write(config_file, config_data, perm: 0o600)
-
-        logger.info { "Configuration saved to #{config_file}" }
       end
 
       def install_remote_kubeconfig
