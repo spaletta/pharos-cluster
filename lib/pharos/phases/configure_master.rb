@@ -29,6 +29,7 @@ module Pharos
 
       def push_audit_config
         logger.info { "Pushing audit configs to master ..." }
+
         @ssh.exec!("sudo mkdir -p #{kubeadm_config.audit_dir}")
         @ssh.file(kubeadm_config.audit_webhook_config_file).write(
           parse_resource_file('audit/webhook-config.yml.erb', server: @config.audit.server)
@@ -38,12 +39,16 @@ module Pharos
 
       # @param config [Hash]
       def upload_authentication_token_webhook_config(config)
+        logger.info { "Pushing token authentication webhook config ..." }
+
         @ssh.exec!("sudo mkdir -p #{kubeadm_config.authentication_token_webhook_config_dir}")
         @ssh.file(kubeadm_config.authentication_token_webhook_config_file).write(config.to_yaml)
       end
 
       # @param webhook_config [Hash]
       def upload_authentication_token_webhook_certs(webhook_config)
+        logger.info { "Pushing token authentication webhook certificates ..." }
+
         @ssh.exec!("sudo mkdir -p #{kubeadm_config.authentication_token_webhook_cert_dir}")
         @ssh.file(kubeadm_config.authentication_token_webhook_cert_dir + '/ca.pem').write(File.open(File.expand_path(webhook_config[:cluster][:certificate_authority]))) if webhook_config[:cluster][:certificate_authority]
         @ssh.file(kubeadm_config.authentication_token_webhook_cert_dir + '/cert.pem').write(File.open(File.expand_path(webhook_config[:user][:client_certificate]))) if webhook_config[:user][:client_certificate]
@@ -56,10 +61,8 @@ module Pharos
         logger.debug { "Generating token authentication webhook config ..." }
         auth_token_webhook_config = kubeadm_config.generate_authentication_token_webhook_config(webhook_config)
 
-        logger.info { "Pushing token authentication webhook config ..." }
         upload_authentication_token_webhook_config(auth_token_webhook_config)
 
-        logger.info { "Pushing token authentication webhook certificates ..." }
         upload_authentication_token_webhook_certs(webhook_config)
       end
     end

@@ -36,6 +36,8 @@ module Pharos
 
       # Copies certificates from memory to host
       def push_certs
+        logger.info { "Pushing kube certificate authority files to host ..." }
+
         @ssh.exec!("sudo mkdir -p #{KUBE_PKI_DIR}")
         cluster_context['master-certs'].each do |file, contents|
           path = File.join(KUBE_PKI_DIR, file)
@@ -46,6 +48,8 @@ module Pharos
 
       # Cache certs to memory
       def pull_certs
+        logger.info { "Caching kube certificate authority files to memory ..." }
+
         cache = {}
         SHARED_CERT_FILES.each do |file|
           path = File.join(KUBE_PKI_DIR, file)

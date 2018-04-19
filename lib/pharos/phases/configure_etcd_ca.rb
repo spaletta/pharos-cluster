@@ -13,7 +13,7 @@ module Pharos
           'configure-etcd-ca.sh',
           ARCH: @host.cpu_arch.name
         )
-        logger.info { 'Caching certificate authority files to memory ...' }
+        logger.info { 'Caching etcd certificate authority files to memory ...' }
         cache_ca_to_memory
       end
 
