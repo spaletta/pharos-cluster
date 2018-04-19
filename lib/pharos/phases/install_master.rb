@@ -17,10 +17,8 @@ module Pharos
       end
 
       def call
-        return unless install?
-
         push_certs if cluster_context['master-certs']
-        install
+        install if install?
         pull_certs unless cluster_context['master-certs']
       end
 
@@ -36,6 +34,8 @@ module Pharos
 
       # Copies certificates from memory to host
       def push_certs
+        return if cluster_context['master-certs'].keys.all? { |k| @ssh.file(File.join(KUBE_PKI_DIR, k)).exist? }
+
         logger.info { "Pushing kube certificate authority files to host ..." }
 
         @ssh.exec!("sudo mkdir -p #{KUBE_PKI_DIR}")
