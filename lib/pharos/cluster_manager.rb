@@ -54,9 +54,9 @@ module Pharos
       apply_phase(Phases::UpgradeMaster, config.master_hosts, ssh: true, parallel: false)
       apply_phase(Phases::ConfigureKubelet, config.hosts, ssh: true, parallel: true)
       apply_phase(Phases::InstallMaster, config.master_hosts, ssh: true, parallel: false)
+      apply_phase(Phases::ConfigureClient, config.master_hosts, ssh: true, parallel: true)
 
       # configure and use master client
-      apply_phase(Phases::ConfigureClient, [config.master_host], ssh: true, parallel: false)
       apply_phase(Phases::ConfigureDNS, [config.master_host], master: config.master_host)
       apply_phase(Phases::ConfigureNetwork, [config.master_host], master: config.master_host)
       apply_phase(Phases::ConfigureMetrics, [config.master_host], master: config.master_host)

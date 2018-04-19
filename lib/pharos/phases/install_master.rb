@@ -21,7 +21,6 @@ module Pharos
 
         push_certs if cluster_context['master-certs']
         install
-        install_kubeconfig
         pull_certs unless cluster_context['master-certs']
       end
 
@@ -53,11 +52,6 @@ module Pharos
           cache[file] = @ssh.file(path).read
         end
         cluster_context['master-certs'] = cache
-      end
-
-      def install_kubeconfig
-        @ssh.exec!('install -m 0700 -d ~/.kube')
-        @ssh.exec!('sudo install -o $USER -m 0600 /etc/kubernetes/admin.conf ~/.kube/config')
       end
     end
   end
