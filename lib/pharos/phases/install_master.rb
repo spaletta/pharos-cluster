@@ -24,7 +24,7 @@ module Pharos
       end
 
       def install
-        cfg = kubeadm_config.generate
+        cfg = kubeadm_config.generate_config
 
         logger.info { "Initializing control plane ..." }
         @ssh.tempfile(content: cfg.to_yaml, prefix: "kubeadm.cfg") do |tmp_file|

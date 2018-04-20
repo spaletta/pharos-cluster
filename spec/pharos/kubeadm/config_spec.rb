@@ -1,7 +1,7 @@
-require "pharos/phases/configure_master"
+require "pharos/kubeadm"
 
-describe Pharos::Phases::ConfigureMaster do
-  let(:master) { Pharos::Configuration::Host.new(address: 'test', private_address: 'private', role: 'master') }
+describe Pharos::Kubeadm::Config do
+  let(:host) { Pharos::Configuration::Host.new(address: '192.0.2.1', private_address: '192.168.0.1', role: 'master') }
   let(:config_hosts_count) { 1 }
 
   let(:config) { Pharos::Config.new(
@@ -14,11 +14,9 @@ describe Pharos::Phases::ConfigureMaster do
       etcd: {}
   ) }
 
-  let(:ssh) { instance_double(Pharos::SSH::Client) }
-  subject { described_class.new(master, config: config, ssh: ssh) }
+  subject { described_class.new(config, host) }
 
   describe '#generate_config' do
-
     context 'with auth configuration' do
       let(:config) { Pharos::Config.new(
         hosts: (1..config_hosts_count).map { |i| Pharos::Configuration::Host.new() },
@@ -60,10 +58,10 @@ describe Pharos::Phases::ConfigureMaster do
     end
 
     it 'comes with correct master addresses' do
-      config.hosts << master
+      config.hosts << host
       config = subject.generate_config
-      expect(config.dig('apiServerCertSANs')).to eq(['localhost', 'test', 'private'])
-      expect(config.dig('api', 'advertiseAddress')).to eq('private')
+      expect(config.dig('apiServerCertSANs')).to eq(['localhost', '192.0.2.1', '192.168.0.1'])
+      expect(config.dig('api', 'advertiseAddress')).to eq('192.168.0.1')
     end
 
     it 'comes with internal etcd config' do
@@ -154,9 +152,9 @@ describe Pharos::Phases::ConfigureMaster do
             'mountPath' => '/etc/kubernetes/authentication'
           },
           {
-            'name' => 'pharos',
-            'hostPath' => '/etc/pharos',
-            'mountPath' => '/etc/pharos'
+            'name' => 'pharos-auth-token-webhook-certs',
+            'hostPath' => '/etc/pharos/token_webhook',
+            'mountPath' => '/etc/pharos/token_webhook'
           }
         ]
         config = subject.generate_config
@@ -165,7 +163,7 @@ describe Pharos::Phases::ConfigureMaster do
     end
 
     context 'with cri-o configuration' do
-      let(:master) { Pharos::Configuration::Host.new(address: 'test', container_runtime: 'cri-o') }
+      let(:host) { Pharos::Configuration::Host.new(address: 'test', container_runtime: 'cri-o') }
       let(:config) { Pharos::Config.new(
         hosts: (1..config_hosts_count).map { |i| Pharos::Configuration::Host.new() },
         network: {},

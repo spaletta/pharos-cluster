@@ -19,7 +19,7 @@ module Pharos
       end
 
       # @return [Hash]
-      def generate
+      def generate_config
         config = {
           'apiVersion' => 'kubeadm.k8s.io/v1alpha1',
           'kind' => 'MasterConfiguration',
