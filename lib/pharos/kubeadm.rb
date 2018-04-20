@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Pharos
   module Kubeadm
     class Config
@@ -6,10 +8,10 @@ module Pharos
       AUTHENTICATION_TOKEN_WEBHOOK_CERT_DIR = '/etc/pharos/token_webhook'
       AUTHENTICATION_TOKEN_WEBHOOK_CONFIG_DIR = '/etc/kubernetes/authentication'
 
-      AUDIT_CFG_DIR = ('/etc/pharos/audit').freeze
+      AUDIT_CFG_DIR = '/etc/pharos/audit'
 
-      SECRETS_CFG_DIR = ('/etc/pharos/secrets-encryption').freeze
-      SECRETS_CFG_FILE = (SECRETS_CFG_DIR + '/config.yml').freeze
+      SECRETS_CFG_DIR = '/etc/pharos/secrets-encryption'
+      SECRETS_CFG_FILE = SECRETS_CFG_DIR + '/config.yml'
 
       # @param config [Pharos::Config]
       # @param host [Pharos::Configuration::Host]
@@ -124,9 +126,11 @@ module Pharos
       def audit_dir
         AUDIT_CFG_DIR
       end
+
       def audit_webhook_config_file
         AUDIT_CFG_DIR + '/webhook.yml'
       end
+
       def audit_policy_file
         AUDIT_CFG_DIR + '/policy.yml'
       end
@@ -135,7 +139,7 @@ module Pharos
       def configure_audit_webhook(config)
         config['apiServerExtraArgs'].merge!(
           "audit-webhook-config-file" => audit_webhook_config_file,
-          "audit-policy-file" => audit_policy_file,
+          "audit-policy-file" => audit_policy_file
         )
         config['apiServerExtraVolumes'] += volume_mounts_for_audit_webhook
       end
@@ -153,9 +157,11 @@ module Pharos
       def authentication_token_webhook_config_dir
         AUTHENTICATION_TOKEN_WEBHOOK_CONFIG_DIR
       end
+
       def authentication_token_webhook_config_file
         AUTHENTICATION_TOKEN_WEBHOOK_CONFIG_DIR + '/token-webhook-config.yaml'
       end
+
       def authentication_token_webhook_cert_dir
         AUTHENTICATION_TOKEN_WEBHOOK_CERT_DIR
       end
