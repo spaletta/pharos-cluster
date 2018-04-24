@@ -118,6 +118,28 @@ describe Pharos::Kubeadm::Config do
       end
     end
 
+    context 'with cloud configuration' do
+      let(:config) { Pharos::Config.new(
+        hosts: (1..config_hosts_count).map { |i| Pharos::Configuration::Host.new() },
+        network: {},
+        addons: {},
+        cloud: {
+          provider: 'aws',
+          config: './cloud-config'
+        }
+      ) }
+
+      it 'comes with proper cloud provider' do
+        config = subject.generate_config
+        expect(config['cloudProvider']).to eq('aws')
+      end
+
+      it 'comes with proper cloud config' do
+        config = subject.generate_config
+        expect(config.dig('apiServerExtraArgs', 'cloud-config')).to eq('/etc/pharos/cloud/cloud-config')
+      end
+    end
+
     context 'with authentication webhook configuration' do
       let(:config) { Pharos::Config.new(
         hosts: (1..config_hosts_count).map { |i| Pharos::Configuration::Host.new() },
@@ -144,7 +166,7 @@ describe Pharos::Kubeadm::Config do
           .to eq('/etc/kubernetes/authentication/token-webhook-config.yaml')
       end
 
-      it 'comes with proper volumen mounts' do
+      it 'comes with proper volume mounts' do
         valid_volume_mounts =  [
           {
             'name' => 'k8s-auth-token-webhook',
@@ -158,7 +180,7 @@ describe Pharos::Kubeadm::Config do
           }
         ]
         config = subject.generate_config
-        expect(config['apiServerExtraVolumes']).to include(valid_volume_mounts[0], valid_volume_mounts[1])
+        expect(config['apiServerExtraVolumes']).to include(valid_volume_mounts[0])
       end
     end
 

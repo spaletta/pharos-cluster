@@ -13,6 +13,9 @@ module Pharos
       SECRETS_CFG_DIR = '/etc/pharos/secrets-encryption'
       SECRETS_CFG_FILE = SECRETS_CFG_DIR + '/config.yml'
 
+      CLOUD_CFG_DIR = '/etc/pharos/cloud'
+      CLOUD_CFG_FILE = CLOUD_CFG_DIR + '/cloud-config'
+
       # @param config [Pharos::Config]
       # @param host [Pharos::Configuration::Host]
       def initialize(config, host)
@@ -41,12 +44,17 @@ module Pharos
           }
         }
 
+        config['apiServerExtraArgs'] = {
+          'apiserver-count' => @config.master_hosts.size.to_s
+        }
+
         if @host.container_runtime == 'cri-o'
           config['criSocket'] = '/var/run/crio/crio.sock'
         end
 
         if @config.cloud && @config.cloud.provider != 'external'
           config['cloudProvider'] = @config.cloud.provider
+          config['apiServerExtraArgs']['cloud-config'] = CLOUD_CFG_FILE if @config.cloud.config
         end
 
         # Only configure etcd if the external endpoints are given
@@ -56,9 +64,6 @@ module Pharos
           configure_internal_etcd(config)
         end
 
-        config['apiServerExtraArgs'] = {
-          'apiserver-count' => @config.master_hosts.size.to_s
-        }
         config['apiServerExtraVolumes'] = []
 
         # Only if authentication token webhook option are given
@@ -234,6 +239,13 @@ module Pharos
           'mountPath' => AUTHENTICATION_TOKEN_WEBHOOK_CERT_DIR
         }
         volume_mounts
+      end
+
+      def cloud_cfg_dir
+        CLOUD_CFG_DIR
+      end
+      def cloud_cfg_file
+        CLOUD_CFG_FILE
       end
     end
   end

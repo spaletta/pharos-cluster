@@ -12,6 +12,8 @@ module Pharos
       def call
         push_external_etcd_certs if @config.etcd&.certificate
 
+        push_cloud_config if @config.cloud&.config
+
         push_audit_config if @config.audit&.server
 
         push_authentication_token_webhook_config if @config.authentication&.token_webhook
@@ -64,6 +66,13 @@ module Pharos
         upload_authentication_token_webhook_config(auth_token_webhook_config)
 
         upload_authentication_token_webhook_certs(webhook_config)
+      end
+
+      def push_cloud_config
+        logger.info { "Pushing cloud-config to master ..." }
+
+        @ssh.exec!("sudo mkdir -p #{kubeadm_config.cloud_cfg_dir}")
+        @ssh.file(kubeadm_config.cloud_cfg_file).write(File.open(File.expand_path(@config.cloud.config)))
       end
     end
   end
